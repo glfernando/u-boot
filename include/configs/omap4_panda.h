@@ -30,7 +30,16 @@
 
 #define CONFIG_UBOOT_ENABLE_PADS_ALL
 
+#define CONFIG_USB_MUSB_PIO_ONLY
+#define CONFIG_USB_MUSB_OMAP2PLUS
+
 #include <configs/ti_omap4_common.h>
+
+/* remove old MUSB driver included by ti_omap4_common.h */
+#undef CONFIG_USB_MUSB_UDC
+#undef CONFIG_USB_OMAP3
+#undef CONFIG_USB_TTY
+#undef CONFIG_USB_DEVICE
 
 /* GPIO */
 

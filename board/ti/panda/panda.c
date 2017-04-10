@@ -21,6 +21,9 @@
 #include <asm/ehci-omap.h>
 #endif
 
+#include <asm/omap_musb.h>
+#include <linux/usb/musb.h>
+
 #define PANDA_ULPI_PHY_TYPE_GPIO       182
 #define PANDA_BOARD_ID_1_GPIO          101
 #define PANDA_ES_BOARD_ID_1_GPIO        48
@@ -199,6 +202,33 @@ void emif_get_dmm_regs(const struct dmm_lisa_map_regs
 
 #endif
 
+#ifdef CONFIG_USB_MUSB_OMAP2PLUS
+static struct musb_hdrc_config musb_config = {
+	.multipoint     = 1,
+	.dyn_fifo       = 1,
+	.num_eps        = 16,
+	.ram_bits       = 12,
+};
+
+static struct omap_musb_board_data musb_board_data = {
+	.interface_type = MUSB_INTERFACE_UTMI,
+};
+
+static struct musb_hdrc_platform_data musb_plat = {
+#if defined(CONFIG_USB_MUSB_HOST)
+	.mode           = MUSB_HOST,
+#elif defined(CONFIG_USB_MUSB_GADGET)
+	.mode           = MUSB_PERIPHERAL,
+#else
+#error "Please define either CONFIG_USB_MUSB_HOST or CONFIG_USB_MUSB_GADGET"
+#endif
+	.config         = &musb_config,
+	.power          = 100,
+	.platform_ops   = &omap2430_ops,
+	.board_data     = &musb_board_data,
+};
+#endif
+
 /**
  * @brief misc_init_r - Configure Panda board specific configurations
  * such as power configurations, ethernet initialization as phase2 of
@@ -267,6 +297,10 @@ int misc_init_r(void)
 
 	/* set serial number */
 	omap_die_id_serial();
+
+#ifdef CONFIG_USB_MUSB_OMAP2PLUS
+	musb_register(&musb_plat, &musb_board_data, (void *)MUSB_BASE);
+#endif
 
 	return 0;
 }

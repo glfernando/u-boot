@@ -265,6 +265,9 @@ int misc_init_r(void)
 
 	omap_die_id_usbethaddr();
 
+	/* set serial number */
+	omap_die_id_serial();
+
 	return 0;
 }
 
